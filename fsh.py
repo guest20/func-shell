@@ -5,6 +5,9 @@
 # (c) 2012-2013 Dennis Kaarsemaker <dennis@kaarsemaker.net>
 # see COPYING for license details
 
+import sys
+sys.path.append('./pyparsing-code/src')
+
 import fcntl
 from func.overlord.client import Overlord, DEFAULT_MAPLOC
 import optparse
@@ -29,6 +32,8 @@ def shell():
                  help="Print all commands before executing")
     p.add_option('-i', '--interactive', dest="interactive", action="store_true", default=False,
                  help="Start an interactive shell after processing all files")
+    p.add_option('-e', '--eval', dest="startup", action="append", default=[],
+                 help="Run these commands before starting the shell.")
     opts, files = p.parse_args()
 
     if not files or opts.interactive:
@@ -47,6 +52,8 @@ class FuncShell(object):
         self.last_result = {}
         self.last_ok = set()
         self.grammar = FuncShellGrammar()
+        self.interactive = opts.interactive
+        self.startup_commands = opts.startup
 
     def run_shell(self):
         do_readline = sys.stdin.isatty() and ('-', sys.stdin, 0) in self.files
@@ -56,6 +63,14 @@ class FuncShell(object):
                 if os.path.exists(file):
                     with open(file) as fd:
                         readline.parse_and_bind(fd.read())
+
+        for line in self.startup_commands:
+            if self.verbose:
+                print "%s(Now processing %s)" % (self.ps4, line)
+            self.parse_and_run(line)
+
+        if self.startup_commands and not self.interactive:
+            sys.exit(0) 
 
         while self.files:
             self.curfile, self.curfd, self.curline = self.files[0]
