@@ -34,11 +34,20 @@ def shell():
                  help="Start an interactive shell after processing all files")
     p.add_option('-e', '--eval', dest="startup", action="append", default=[],
                  help="Run these commands before starting the shell.")
+    p.add_option('-M', None, dest="shell_mod", action="store", default=None,
+                 help="improt and use the Shell from this FuncShell.%s")
     opts, files = p.parse_args()
 
     if not files or opts.interactive:
         files.append(sys.stdin)
-    FuncShell(files, opts).run_shell()
+
+    shell_class=FuncShell
+    if opts.shell_mod is not None: 
+        __import__('FuncShell.%s' % opts.shell_mod)
+        shell_class=getattr(sys.modules['FuncShell'],opts.shell_mod).Shell
+        
+    shell_class(files, opts).run_shell()
+
 
 class FuncShell(object):
     def __init__(self, files, opts):
@@ -55,6 +64,7 @@ class FuncShell(object):
         self.interactive = opts.interactive
         self.startup_commands = opts.startup
 
+    def prompt(self): return 'fsh> '
     def run_shell(self):
         do_readline = sys.stdin.isatty() and ('-', sys.stdin, 0) in self.files
         if do_readline and os.path.exists(os.path.expanduser('~/.fsh_history')):
@@ -99,7 +109,7 @@ class FuncShell(object):
             self.curline += 1
             try:
                 if self.curfd.isatty():
-                    line = raw_input('fsh> ')
+                    line = raw_input(self.prompt())
                 else:
                     line = self.curfd.readline()
             except KeyboardInterrupt:
@@ -328,6 +338,8 @@ Running shell commands:
         else:
             rows, columns = struct.unpack('hh', fcntl.ioctl(sys.stdin, termios.TIOCGWINSZ, '1234'))
         return columns
+
+
 
 class FuncShellGrammar(object):
     def __init__(self):
