@@ -271,8 +271,9 @@ class FuncShell(object):
     def run_exit(self, args):
         raise SystemExit()
 
+    def version(self): return "1.3"
     def run_help(self, args):
-        print """Func shell 1.3
+        print """Func shell %s
 
 Basic commands:
    ?            Displays current settings
@@ -291,7 +292,7 @@ Calling func methods:
 Running shell commands:
 
    command arg1 arg2 arg3
-"""
+""" % self.version()
 
     def run(self, module, method, args, quiet):
         if not self.hosts:
