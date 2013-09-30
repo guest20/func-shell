@@ -183,9 +183,13 @@ class FuncShell(object):
     def parse_hosts(self, query):
         ret = set()
         if fsh_query:
-            ret = fsh_query.query(query)
-            if ret is not None:
-                query = ';'.join(ret)
+            try: 
+                ret = fsh_query.query(query)
+                if ret is not None:
+                    query = ';'.join(ret)
+            except Exception as e:
+                print "fsh_query had trobule with %s\nException was: %s" % ( query, e)
+                return
         if not isinstance(query, str):
             query = ''.join(query)
         if query == '$ok':
