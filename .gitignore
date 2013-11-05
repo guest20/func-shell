@@ -1,5 +1,6 @@
 .*.sw?
 .py?
+*.pyc
 MANIFEST
 build
 dist
