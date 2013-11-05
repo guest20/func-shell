@@ -5,9 +5,6 @@
 # (c) 2012-2013 Dennis Kaarsemaker <dennis@kaarsemaker.net>
 # see COPYING for license details
 
-import sys
-sys.path.append('./pyparsing-code/src')
-
 import fcntl
 from func.overlord.client import Overlord, DEFAULT_MAPLOC
 import optparse
@@ -76,7 +73,7 @@ class FuncShell(object):
 
         for line in self.startup_commands:
             if self.verbose:
-                print "%s(Now processing %s)" % (self.ps4, line)
+                print "%s(Now running %s)" % (self.ps4, line)
             self.parse_and_run(line)
 
         if self.startup_commands and not self.interactive:
@@ -238,7 +235,7 @@ class FuncShell(object):
     def run_func_call(self, line):
         quiet = line[0] == '@' and line.pop(0)
         if len(line) != 3:
-            raise RuntimeError("Internal error")
+            raise RuntimeError("Internal error - pass three things here: %s has only %s" %(line,len(line)))
         args = ''.join(line[2])
         if args == "()":
             args = tuple()
@@ -275,7 +272,7 @@ class FuncShell(object):
     def run_exit(self, args):
         raise SystemExit()
 
-    def version(self): return "1.3"
+    def version(self): return "1.4"
     def run_help(self, args):
         print """Func shell %s
 
